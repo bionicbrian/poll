@@ -4,6 +4,7 @@ import { Poll } from "../models/Poll";
 import { Candidate } from "../models/Candidate";
 import { Vote } from "../models/Vote";
 import { PollsInMemory as PollsRepo } from "../repos/PollsInMemory";
+import addCandidate from "../actions/addCandidate";
 
 export default class ActivePoll extends React.Component {
     constructor(props) {
@@ -33,21 +34,23 @@ export default class ActivePoll extends React.Component {
                 </form>
                 <ul>
                 {this.state.poll.get("candidates").map((c) => {
-                    return <li key={c.cid}>{c.get("name")} : {c.get("votes").first().get("value")}</li>;
+                    return <li key={c.cid}>{c.get("name")}</li>;
                 })}
                 </ul>
             </div>
         )
     }
 
+    _showError(e) {
+        debugger;
+    }
+
     _addCandidate(ev) {
         ev.preventDefault();
         var input = ReactDOM.findDOMNode(this.refs.candidateName);
-        var c = new Candidate({ name: input.value });
-        c.get("votes").add(new Vote({ value: 1 }));
-        this.state.poll.get("candidates").add(c);
-        input.value = "";
 
-        setTimeout(() => c.get("votes").first().set("value", 2), 2000);
+        addCandidate({ name: input.value, pollId: this.state.poll.id }).done(() => {
+            input.value = "";
+        }, (e) => this._showError(e));
     }
 }
