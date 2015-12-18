@@ -1,8 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { Poll } from "../models/Poll";
-import { Candidate } from "../models/Candidate";
-import { Vote } from "../models/Vote";
 import { PollsInMemory as PollsRepo } from "../repos/PollsInMemory";
 import addCandidate from "../actions/addCandidate";
 
@@ -10,7 +8,7 @@ export default class ActivePoll extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            poll: new Poll()
+            poll: new Poll() // Should use a NullPoll
         };
     }
 

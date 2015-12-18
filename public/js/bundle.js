@@ -33945,10 +33945,6 @@ var _reactDom2 = _interopRequireDefault(_reactDom);
 
 var _Poll = require("../models/Poll");
 
-var _Candidate = require("../models/Candidate");
-
-var _Vote = require("../models/Vote");
-
 var _PollsInMemory = require("../repos/PollsInMemory");
 
 var _addCandidate2 = require("../actions/addCandidate");
@@ -33972,7 +33968,7 @@ var ActivePoll = (function (_React$Component) {
         var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ActivePoll).call(this, props));
 
         _this.state = {
-            poll: new _Poll.Poll()
+            poll: new _Poll.Poll() // Should use a NullPoll
         };
         return _this;
     }
@@ -34054,7 +34050,7 @@ var ActivePoll = (function (_React$Component) {
 
 exports.default = ActivePoll;
 
-},{"../actions/addCandidate":164,"../models/Candidate":166,"../models/Poll":167,"../models/Vote":168,"../repos/PollsInMemory":169,"react":162,"react-dom":6}],171:[function(require,module,exports){
+},{"../actions/addCandidate":164,"../models/Poll":167,"../repos/PollsInMemory":169,"react":162,"react-dom":6}],171:[function(require,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
