@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 
 import { Poll } from "../models/Poll";
-import App from "../App";
+import fetchPollById from "../actions/fetchPollById";
 import addCandidate from "../actions/addCandidate";
 
 import Candidate from "./Candidate";
@@ -13,12 +13,12 @@ export default class ActivePoll extends React.Component {
         this.state = {
             poll: new Poll() // Should use a NullPoll
         };
-        this._pollsRepo = App.get("pollsRepo");
     }
 
     componentDidMount() {
-        this._pollsRepo.fetchFirst()
+        fetchPollById(/*this.props.pollId*/)
             .done((poll) => {
+                // TODO: Stop listening to this on unmount
                 poll.on("update", (poll) => {
                     this.setState({ poll });
                 });

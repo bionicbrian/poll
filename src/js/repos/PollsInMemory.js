@@ -24,11 +24,12 @@ export default class PollsInMemory {
     fetchById(id) {
         var d = Q.defer();
 
-        var poll = _.findWhere(this._polls, { id: id });
+        var poll = _.first(this._polls);
+        // var poll = _.findWhere(this._polls, { id });
         if (poll) {
             d.resolve(poll);
         } else {
-            d.reject(new Error("Could not find Poll"));
+            d.reject(new Error("Could not find Poll."));
         }
 
         return d.promise;

@@ -33832,6 +33832,25 @@ function addVote(candidate, _ref) {
 },{"../App":164,"q":5}],167:[function(require,module,exports){
 "use strict";
 
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = fetchPollById;
+
+var _App = require("../App");
+
+var _App2 = _interopRequireDefault(_App);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function fetchPollById(pollId) {
+    var pollsRepo = _App2.default.get("pollsRepo");
+    return pollsRepo.fetchById(pollId);
+}
+
+},{"../App":164}],168:[function(require,module,exports){
+"use strict";
+
 var _react = require("react");
 
 var _react2 = _interopRequireDefault(_react);
@@ -33859,7 +33878,7 @@ _App2.default.set("user", { id: 123 });
 
 _reactDom2.default.render(_react2.default.createElement(_Main2.default, null), document.querySelector(".main"));
 
-},{"./App":164,"./repos/PollsInMemory":171,"./ui/Main":174,"react":162,"react-dom":6}],168:[function(require,module,exports){
+},{"./App":164,"./repos/PollsInMemory":172,"./ui/Main":175,"react":162,"react-dom":6}],169:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -33893,7 +33912,7 @@ var Candidates = _backbone2.default.Collection.extend({
 exports.Candidate = Candidate;
 exports.Candidates = Candidates;
 
-},{"./Vote":170,"backbone":1}],169:[function(require,module,exports){
+},{"./Vote":171,"backbone":1}],170:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -33927,7 +33946,7 @@ var Polls = _backbone2.default.Collection.extend({
 exports.Poll = Poll;
 exports.Polls = Polls;
 
-},{"./Candidate":168,"backbone":1}],170:[function(require,module,exports){
+},{"./Candidate":169,"backbone":1}],171:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -33949,7 +33968,7 @@ var Votes = _backbone2.default.Collection.extend({
 exports.Vote = Vote;
 exports.Votes = Votes;
 
-},{"backbone":1}],171:[function(require,module,exports){
+},{"backbone":1}],172:[function(require,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -34002,11 +34021,12 @@ var PollsInMemory = (function () {
         value: function fetchById(id) {
             var d = _q2.default.defer();
 
-            var poll = _underscore2.default.findWhere(this._polls, { id: id });
+            var poll = _underscore2.default.first(this._polls);
+            // var poll = _.findWhere(this._polls, { id });
             if (poll) {
                 d.resolve(poll);
             } else {
-                d.reject(new Error("Could not find Poll"));
+                d.reject(new Error("Could not find Poll."));
             }
 
             return d.promise;
@@ -34018,7 +34038,7 @@ var PollsInMemory = (function () {
 
 exports.default = PollsInMemory;
 
-},{"../App":164,"../models/Poll":169,"q":5,"underscore":163}],172:[function(require,module,exports){
+},{"../App":164,"../models/Poll":170,"q":5,"underscore":163}],173:[function(require,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -34037,9 +34057,9 @@ var _reactDom2 = _interopRequireDefault(_reactDom);
 
 var _Poll = require("../models/Poll");
 
-var _App = require("../App");
+var _fetchPollById = require("../actions/fetchPollById");
 
-var _App2 = _interopRequireDefault(_App);
+var _fetchPollById2 = _interopRequireDefault(_fetchPollById);
 
 var _addCandidate2 = require("../actions/addCandidate");
 
@@ -34068,7 +34088,6 @@ var ActivePoll = (function (_React$Component) {
         _this.state = {
             poll: new _Poll.Poll() // Should use a NullPoll
         };
-        _this._pollsRepo = _App2.default.get("pollsRepo");
         return _this;
     }
 
@@ -34077,7 +34096,8 @@ var ActivePoll = (function (_React$Component) {
         value: function componentDidMount() {
             var _this2 = this;
 
-            this._pollsRepo.fetchFirst().done(function (poll) {
+            (0, _fetchPollById2.default)(). /*this.props.pollId*/done(function (poll) {
+                // TODO: Stop listening to this on unmount
                 poll.on("update", function (poll) {
                     _this2.setState({ poll: poll });
                 });
@@ -34159,7 +34179,7 @@ var ActivePoll = (function (_React$Component) {
 
 exports.default = ActivePoll;
 
-},{"../App":164,"../actions/addCandidate":165,"../models/Poll":169,"./Candidate":173,"react":162,"react-dom":6}],173:[function(require,module,exports){
+},{"../actions/addCandidate":165,"../actions/fetchPollById":167,"../models/Poll":170,"./Candidate":174,"react":162,"react-dom":6}],174:[function(require,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -34261,7 +34281,7 @@ var Candidate = (function (_React$Component) {
 
 exports.default = Candidate;
 
-},{"../App":164,"../actions/addVote":166,"react":162}],174:[function(require,module,exports){
+},{"../App":164,"../actions/addVote":166,"react":162}],175:[function(require,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -34311,4 +34331,4 @@ var Main = (function (_React$Component) {
 
 exports.default = Main;
 
-},{"./ActivePoll":172,"react":162}]},{},[167]);
+},{"./ActivePoll":173,"react":162}]},{},[168]);
