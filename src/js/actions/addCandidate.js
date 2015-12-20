@@ -1,10 +1,10 @@
-import { Candidate } from "../models/Candidate";
-import { PollsInMemory as PollsRepo } from "../repos/PollsInMemory";
+import Q from "q";
 
-export default function addCandidate({ name, pollId }) {
-    return PollsRepo.fetchById(pollId).then((poll) => {
-        var c = new Candidate({ name });
-        poll.get("candidates").add(c);
-        return poll;
-    });
+export default function addCandidate(poll, { name, pollId }) {
+    var d = Q.defer();
+
+    poll.get("candidates").add({ name });
+    d.resolve(poll);
+
+    return d.promise;
 }

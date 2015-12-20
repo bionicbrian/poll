@@ -1,14 +1,17 @@
 import Q from "q";
 import _ from "underscore";
 import { Poll } from "../models/Poll";
+import App from "../App";
 
-var polls = [new Poll({ title: "Lunch" })];
+export default class PollsInMemory {
+    constructor() {
+        this._polls = [new Poll({ title: "Lunch" })];
+    }
 
-export class PollsInMemory {
-    static fetchFirst() {
+    fetchFirst() {
         var d = Q.defer();
 
-        var poll = _.first(polls);
+        var poll = _.first(this._polls);
         if (poll) {
             d.resolve(poll);
         } else {
@@ -18,10 +21,10 @@ export class PollsInMemory {
         return d.promise;
     }
 
-    static fetchById(id) {
+    fetchById(id) {
         var d = Q.defer();
 
-        var poll = _.findWhere(polls, { id: id });
+        var poll = _.findWhere(this._polls, { id: id });
         if (poll) {
             d.resolve(poll);
         } else {

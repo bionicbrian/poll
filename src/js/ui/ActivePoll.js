@@ -1,8 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom";
+
 import { Poll } from "../models/Poll";
-import { PollsInMemory as PollsRepo } from "../repos/PollsInMemory";
+import App from "../App";
 import addCandidate from "../actions/addCandidate";
+
+import Candidate from "./Candidate";
 
 export default class ActivePoll extends React.Component {
     constructor(props) {
@@ -10,11 +13,12 @@ export default class ActivePoll extends React.Component {
         this.state = {
             poll: new Poll() // Should use a NullPoll
         };
+        this._pollsRepo = App.get("pollsRepo");
     }
 
     componentDidMount() {
-        PollsRepo.fetchFirst()
-            .then((poll) => {
+        this._pollsRepo.fetchFirst()
+            .done((poll) => {
                 poll.on("update", (poll) => {
                     this.setState({ poll });
                 });
@@ -25,18 +29,30 @@ export default class ActivePoll extends React.Component {
     render() {
         return (
             <div>
-                <h1>Poll: {this.state.poll.get("title")}</h1>
+                <h1>Poll: {this._title}</h1>
                 <form onSubmit={(ev) => this._addCandidate(ev)}>
                     <input type="text" ref="candidateName" />
                     <button type="submit">Add</button>
                 </form>
-                <ul>
-                {this.state.poll.get("candidates").map((c) => {
-                    return <li key={c.cid}>{c.get("name")}</li>;
+                <ul className="candidate-list">
+                {this._candidates.map((c) => {
+                    return <Candidate key={c.cid} candidate={c} />;
                 })}
                 </ul>
             </div>
         )
+    }
+
+    get _title() {
+        return !this.state.poll ? null : this.state.poll.get("title");
+    }
+
+    get _candidates() {
+        if (!this.state.poll) {
+            return [];
+        } else {
+            return this.state.poll.get("candidates");
+        }
     }
 
     _showError(e) {
@@ -47,8 +63,8 @@ export default class ActivePoll extends React.Component {
         ev.preventDefault();
         var input = ReactDOM.findDOMNode(this.refs.candidateName);
 
-        addCandidate({ name: input.value, pollId: this.state.poll.id }).done(() => {
-            input.value = "";
-        }, (e) => this._showError(e));
+        addCandidate(this.state.poll, { name: input.value, pollId: this.state.poll.id })
+            .catch((e) => this._showError(e))
+            .done(() => input.value = "");
     }
 }

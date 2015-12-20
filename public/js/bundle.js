@@ -33733,27 +33733,103 @@ arguments[4][2][0].apply(exports,arguments)
 },{"dup":2}],164:[function(require,module,exports){
 "use strict";
 
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var state = {};
+
+var App = (function () {
+    function App() {
+        _classCallCheck(this, App);
+    }
+
+    _createClass(App, null, [{
+        key: "set",
+        value: function set(prop, val) {
+            state[prop] = val;
+        }
+    }, {
+        key: "get",
+        value: function get(prop) {
+            return state[prop];
+        }
+    }]);
+
+    return App;
+})();
+
+exports.default = App;
+;
+
+},{}],165:[function(require,module,exports){
+"use strict";
+
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
 exports.default = addCandidate;
 
-var _Candidate = require("../models/Candidate");
+var _q = require("q");
 
-var _PollsInMemory = require("../repos/PollsInMemory");
+var _q2 = _interopRequireDefault(_q);
 
-function addCandidate(_ref) {
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function addCandidate(poll, _ref) {
     var name = _ref.name;
     var pollId = _ref.pollId;
 
-    return _PollsInMemory.PollsInMemory.fetchById(pollId).then(function (poll) {
-        var c = new _Candidate.Candidate({ name: name });
-        poll.get("candidates").add(c);
-        return poll;
-    });
+    var d = _q2.default.defer();
+
+    poll.get("candidates").add({ name: name });
+    d.resolve(poll);
+
+    return d.promise;
 }
 
-},{"../models/Candidate":166,"../repos/PollsInMemory":169}],165:[function(require,module,exports){
+},{"q":5}],166:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = addVote;
+
+var _q = require("q");
+
+var _q2 = _interopRequireDefault(_q);
+
+var _App = require("../App");
+
+var _App2 = _interopRequireDefault(_App);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function addVote(candidate, _ref) {
+    var value = _ref.value;
+
+    var d = _q2.default.defer();
+
+    var userId = _App2.default.get("user").id;
+    var votes = candidate.get("votes");
+    var hasUserVoted = !!votes.findWhere({ userId: userId });
+
+    if (!hasUserVoted) {
+        votes.add({ value: value, userId: userId });
+        d.resolve(candidate);
+    } else {
+        d.reject(new Error("User has already voted for this candidate."));
+    }
+
+    return d.promise;
+}
+
+},{"../App":164,"q":5}],167:[function(require,module,exports){
 "use strict";
 
 var _react = require("react");
@@ -33764,15 +33840,26 @@ var _reactDom = require("react-dom");
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
 
+var _PollsInMemory = require("./repos/PollsInMemory");
+
+var _PollsInMemory2 = _interopRequireDefault(_PollsInMemory);
+
 var _Main = require("./ui/Main");
 
 var _Main2 = _interopRequireDefault(_Main);
 
+var _App = require("./App");
+
+var _App2 = _interopRequireDefault(_App);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+_App2.default.set("pollsRepo", new _PollsInMemory2.default());
+_App2.default.set("user", { id: 123 });
 
 _reactDom2.default.render(_react2.default.createElement(_Main2.default, null), document.querySelector(".main"));
 
-},{"./ui/Main":171,"react":162,"react-dom":6}],166:[function(require,module,exports){
+},{"./App":164,"./repos/PollsInMemory":171,"./ui/Main":174,"react":162,"react-dom":6}],168:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -33806,7 +33893,7 @@ var Candidates = _backbone2.default.Collection.extend({
 exports.Candidate = Candidate;
 exports.Candidates = Candidates;
 
-},{"./Vote":168,"backbone":1}],167:[function(require,module,exports){
+},{"./Vote":170,"backbone":1}],169:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -33840,7 +33927,7 @@ var Polls = _backbone2.default.Collection.extend({
 exports.Poll = Poll;
 exports.Polls = Polls;
 
-},{"./Candidate":166,"backbone":1}],168:[function(require,module,exports){
+},{"./Candidate":168,"backbone":1}],170:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -33862,7 +33949,7 @@ var Votes = _backbone2.default.Collection.extend({
 exports.Vote = Vote;
 exports.Votes = Votes;
 
-},{"backbone":1}],169:[function(require,module,exports){
+},{"backbone":1}],171:[function(require,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -33870,7 +33957,6 @@ var _createClass = (function () { function defineProperties(target, props) { for
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.PollsInMemory = undefined;
 
 var _q = require("q");
 
@@ -33882,23 +33968,27 @@ var _underscore2 = _interopRequireDefault(_underscore);
 
 var _Poll = require("../models/Poll");
 
+var _App = require("../App");
+
+var _App2 = _interopRequireDefault(_App);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var polls = [new _Poll.Poll({ title: "Lunch" })];
-
-var PollsInMemory = exports.PollsInMemory = (function () {
+var PollsInMemory = (function () {
     function PollsInMemory() {
         _classCallCheck(this, PollsInMemory);
+
+        this._polls = [new _Poll.Poll({ title: "Lunch" })];
     }
 
-    _createClass(PollsInMemory, null, [{
+    _createClass(PollsInMemory, [{
         key: "fetchFirst",
         value: function fetchFirst() {
             var d = _q2.default.defer();
 
-            var poll = _underscore2.default.first(polls);
+            var poll = _underscore2.default.first(this._polls);
             if (poll) {
                 d.resolve(poll);
             } else {
@@ -33912,7 +34002,7 @@ var PollsInMemory = exports.PollsInMemory = (function () {
         value: function fetchById(id) {
             var d = _q2.default.defer();
 
-            var poll = _underscore2.default.findWhere(polls, { id: id });
+            var poll = _underscore2.default.findWhere(this._polls, { id: id });
             if (poll) {
                 d.resolve(poll);
             } else {
@@ -33926,7 +34016,9 @@ var PollsInMemory = exports.PollsInMemory = (function () {
     return PollsInMemory;
 })();
 
-},{"../models/Poll":167,"q":5,"underscore":163}],170:[function(require,module,exports){
+exports.default = PollsInMemory;
+
+},{"../App":164,"../models/Poll":169,"q":5,"underscore":163}],172:[function(require,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -33945,11 +34037,17 @@ var _reactDom2 = _interopRequireDefault(_reactDom);
 
 var _Poll = require("../models/Poll");
 
-var _PollsInMemory = require("../repos/PollsInMemory");
+var _App = require("../App");
+
+var _App2 = _interopRequireDefault(_App);
 
 var _addCandidate2 = require("../actions/addCandidate");
 
 var _addCandidate3 = _interopRequireDefault(_addCandidate2);
+
+var _Candidate = require("./Candidate");
+
+var _Candidate2 = _interopRequireDefault(_Candidate);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -33970,6 +34068,7 @@ var ActivePoll = (function (_React$Component) {
         _this.state = {
             poll: new _Poll.Poll() // Should use a NullPoll
         };
+        _this._pollsRepo = _App2.default.get("pollsRepo");
         return _this;
     }
 
@@ -33978,7 +34077,7 @@ var ActivePoll = (function (_React$Component) {
         value: function componentDidMount() {
             var _this2 = this;
 
-            _PollsInMemory.PollsInMemory.fetchFirst().then(function (poll) {
+            this._pollsRepo.fetchFirst().done(function (poll) {
                 poll.on("update", function (poll) {
                     _this2.setState({ poll: poll });
                 });
@@ -33997,7 +34096,7 @@ var ActivePoll = (function (_React$Component) {
                     "h1",
                     null,
                     "Poll: ",
-                    this.state.poll.get("title")
+                    this._title
                 ),
                 _react2.default.createElement(
                     "form",
@@ -34013,13 +34112,9 @@ var ActivePoll = (function (_React$Component) {
                 ),
                 _react2.default.createElement(
                     "ul",
-                    null,
-                    this.state.poll.get("candidates").map(function (c) {
-                        return _react2.default.createElement(
-                            "li",
-                            { key: c.cid },
-                            c.get("name")
-                        );
+                    { className: "candidate-list" },
+                    this._candidates.map(function (c) {
+                        return _react2.default.createElement(_Candidate2.default, { key: c.cid, candidate: c });
                     })
                 )
             );
@@ -34037,11 +34132,25 @@ var ActivePoll = (function (_React$Component) {
             ev.preventDefault();
             var input = _reactDom2.default.findDOMNode(this.refs.candidateName);
 
-            (0, _addCandidate3.default)({ name: input.value, pollId: this.state.poll.id }).done(function () {
-                input.value = "";
-            }, function (e) {
+            (0, _addCandidate3.default)(this.state.poll, { name: input.value, pollId: this.state.poll.id }).catch(function (e) {
                 return _this4._showError(e);
+            }).done(function () {
+                return input.value = "";
             });
+        }
+    }, {
+        key: "_title",
+        get: function get() {
+            return !this.state.poll ? null : this.state.poll.get("title");
+        }
+    }, {
+        key: "_candidates",
+        get: function get() {
+            if (!this.state.poll) {
+                return [];
+            } else {
+                return this.state.poll.get("candidates");
+            }
         }
     }]);
 
@@ -34050,7 +34159,109 @@ var ActivePoll = (function (_React$Component) {
 
 exports.default = ActivePoll;
 
-},{"../actions/addCandidate":164,"../models/Poll":167,"../repos/PollsInMemory":169,"react":162,"react-dom":6}],171:[function(require,module,exports){
+},{"../App":164,"../actions/addCandidate":165,"../models/Poll":169,"./Candidate":173,"react":162,"react-dom":6}],173:[function(require,module,exports){
+"use strict";
+
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _react = require("react");
+
+var _react2 = _interopRequireDefault(_react);
+
+var _App = require("../App");
+
+var _App2 = _interopRequireDefault(_App);
+
+var _addVote2 = require("../actions/addVote");
+
+var _addVote3 = _interopRequireDefault(_addVote2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Candidate = (function (_React$Component) {
+    _inherits(Candidate, _React$Component);
+
+    function Candidate() {
+        _classCallCheck(this, Candidate);
+
+        return _possibleConstructorReturn(this, Object.getPrototypeOf(Candidate).apply(this, arguments));
+    }
+
+    _createClass(Candidate, [{
+        key: "render",
+        value: function render() {
+            var _this2 = this;
+
+            return _react2.default.createElement(
+                "li",
+                { className: "candidate-item" },
+                this._name,
+                " | ",
+                this._votesValue,
+                _react2.default.createElement(
+                    "button",
+                    { disabled: this._hasUserVoted,
+                        onClick: function onClick(ev) {
+                            return _this2._addVote(ev);
+                        } },
+                    "Vote"
+                )
+            );
+        }
+    }, {
+        key: "_showError",
+        value: function _showError(e) {
+            alert(e.message);
+        }
+    }, {
+        key: "_addVote",
+        value: function _addVote() {
+            var _this3 = this;
+
+            (0, _addVote3.default)(this.props.candidate, { value: 1 }).catch(function (e) {
+                return _this3._showError(e);
+            }).done();
+        }
+    }, {
+        key: "_name",
+        get: function get() {
+            return this.props.candidate.get("name");
+        }
+    }, {
+        key: "_votes",
+        get: function get() {
+            return this.props.candidate.get("votes");
+        }
+    }, {
+        key: "_votesValue",
+        get: function get() {
+            return this._votes.reduce(function (vs, v) {
+                return vs + v.get("value");
+            }, 0);
+        }
+    }, {
+        key: "_hasUserVoted",
+        get: function get() {
+            return !!this._votes.findWhere({ userId: _App2.default.get("user").id });
+        }
+    }]);
+
+    return Candidate;
+})(_react2.default.Component);
+
+exports.default = Candidate;
+
+},{"../App":164,"../actions/addVote":166,"react":162}],174:[function(require,module,exports){
 "use strict";
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
@@ -34100,4 +34311,4 @@ var Main = (function (_React$Component) {
 
 exports.default = Main;
 
-},{"./ActivePoll":170,"react":162}]},{},[165]);
+},{"./ActivePoll":172,"react":162}]},{},[167]);
